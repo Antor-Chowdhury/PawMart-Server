@@ -28,13 +28,19 @@ async function run() {
     const database = client.db("PawMart");
     const petListings = database.collection("listings");
 
-    // saving the listing data to db.
+    // saving the listing data to db using POST
     app.post("/listings", async (req, res) => {
       const data = req.body;
       console.log(data);
 
       const result = await petListings.insertOne(data);
       res.send(result); // sending the result to frontend also.
+    });
+
+    // Get Listings from Database
+    app.get("/listings", async (req, res) => {
+      const result = await petListings.find().toArray();
+      res.send(result);
     });
 
     await client.db("admin").command({ ping: 1 });
