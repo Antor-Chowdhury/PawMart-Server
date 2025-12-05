@@ -7,6 +7,7 @@ const port = process.env.PORT || 3000;
 
 const app = express();
 app.use(cors());
+app.use(express.json());
 
 const uri = process.env.MONGO_URI;
 
@@ -23,6 +24,19 @@ async function run() {
   try {
     await client.connect();
 
+    // creating collection for Listings Data
+    const database = client.db("PawMart");
+    const petListings = database.collection("listings");
+
+    // saving the listing data to db.
+    app.post("/listings", async (req, res) => {
+      const data = req.body;
+      console.log(data);
+
+      const result = await petListings.insertOne(data);
+      res.send(result); // sending the result to frontend also.
+    });
+
     await client.db("admin").command({ ping: 1 });
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
@@ -32,3 +46,11 @@ async function run() {
   }
 }
 run().catch(console.dir);
+
+app.get("/", (req, res) => {
+  res.send("Hello from backend");
+});
+
+app.listen(port, () => {
+  console.log(`server is running on ${port}`);
+});
