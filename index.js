@@ -1,4 +1,4 @@
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 
 const express = require("express");
 const cors = require("cors");
@@ -31,7 +31,7 @@ async function run() {
     // saving the listing data to db using POST
     app.post("/listings", async (req, res) => {
       const data = req.body;
-      console.log(data);
+      // console.log(data);
 
       const result = await petListings.insertOne(data);
       res.send(result); // sending the result to frontend also.
@@ -40,6 +40,50 @@ async function run() {
     // Get Listings from Database
     app.get("/listings", async (req, res) => {
       const result = await petListings.find().toArray();
+      res.send(result);
+    });
+
+    // finding a single data to show it's details
+    app.get("/listings/:id", async (req, res) => {
+      const { id } = req.params;
+      // console.log(id);
+
+      const query = { _id: new ObjectId(id) };
+      const result = await petListings.findOne(query);
+      res.send(result);
+    });
+
+    // finding recent-listing
+    app.get("/recent-listings", async (req, res) => {
+      const result = await petListings
+        .find()
+        .sort({ _id: -1 })
+        .limit(6)
+        .toArray();
+
+      res.send(result);
+    });
+
+    // For my-listing
+    app.get("/my-listings", async (req, res) => {
+      const { clientEmail } = req.query; // getting the logged in user email from frontend
+      console.log(clientEmail);
+
+      const query = { email: clientEmail };
+      const result = await petListings.find(query).toArray();
+      res.send(result);
+    });
+
+    // updating the List using PUT
+    app.put("/update/:id", async (req, res) => {
+      const data = req.body;
+      const { id } = req.params;
+      const query = { _id: new ObjectId(id) };
+
+      const updatedList = {
+        $set: data,
+      };
+      const result = await petListings.updateOne(query, updatedList);
       res.send(result);
     });
 
