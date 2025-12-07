@@ -27,6 +27,7 @@ async function run() {
     // creating collection for Listings Data
     const database = client.db("PawMart");
     const petListings = database.collection("listings");
+    const orderCollections = database.collection("orders");
 
     // saving the listing data to db using POST
     app.post("/listings", async (req, res) => {
@@ -94,6 +95,14 @@ async function run() {
 
       const result = await petListings.deleteOne(query);
       res.send(result);
+    });
+
+    // order with POST
+    app.post("/orders", async (req, res) => {
+      const data = req.body;
+      // console.log(data);
+      const result = await orderCollections.insertOne(data);
+      res.status(201).send(result);
     });
 
     await client.db("admin").command({ ping: 1 });
